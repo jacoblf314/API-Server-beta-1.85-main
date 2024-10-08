@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        button {
+            display: block;
+            margin: 10px auto;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        legend {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+        fieldset {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 20px;
+        }
+        .test-result {
+            margin: 5px 0;
+            padding: 5px;
+            font-family: monospace;
+            border-bottom: 1px dashed #ccc;
+        }
+        #urlInput {
+            display: block;
+            margin: 10px auto;
+            padding: 10px;
+            width: 300px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Math API</h1>
+    <input type="text" id="urlInput" value="http://localhost:5000/api/maths" />
+    <button id="testButton">Run Tests</button>
+    <button id="aideButton">Aide</button>
+    <fieldset id="testResultsField">
+        <legend>Test Results</legend>
+        <div id="testResults"></div>
+    </fieldset>
+
+    <script type="module">
+        import MathsAPI from '/wwwroot/API_Maths.js';  
+
+        async function fetchTestResults() {
+            const apiUrl = document.getElementById('urlInput').value.trim();
+            if (!apiUrl) {
+                alert("Please enter a valid URL.");
+                return;
+            }
+
+            try {
+                MathsAPI.API_URL = () => apiUrl;
+
+                const testResults = await MathsAPI.runTests(); 
+                const resultsContainer = document.getElementById('testResults');
+                resultsContainer.innerHTML = ''; 
+
+                testResults.forEach(result => {
+                    let resultString = `OK ---> {"op": "${result.op}", `;
+                    if (result.hasOwnProperty('x')) resultString += `"x": ${result.x}, `;
+                    if (result.hasOwnProperty('y')) resultString += `"y": ${result.y}, `;
+                    if (result.hasOwnProperty('n')) resultString += `"n": ${result.n}, `;
+                    if (result.error) {
+                        resultString += `"error": "${result.error}"`;
+                    } else {
+                        resultString += `"value": ${result.value}`;
+                    }
+                    resultString += `}`;
+
+                    const resultDiv = document.createElement('div');
+                    resultDiv.className = 'test-result';
+                    resultDiv.textContent = resultString;
+
+                    resultsContainer.appendChild(resultDiv);
+                });
+            } catch (error) {
+                console.error('Error fetching test results:', error);
+                document.getElementById('testResults').innerHTML = '<p>Error fetching test results.</p>';
+            }
+        }
+
+        document.getElementById('testButton').addEventListener('click', fetchTestResults);
+
+        document.getElementById('aideButton').addEventListener('click', () => {
+            window.location.href = 'annexe.html'; 
+        });
+    </script>
+</body>
+</html>
